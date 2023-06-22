@@ -41,6 +41,7 @@ const login=async(req,res)=>{
     const accessToken=await jwt.sign(payload,process.env.ACCESSTOKEN_KEY,{expiresIn:'2h'});
     const refreshToken=await jwt.sign({id:user._id},process.env.REFRESHTOKEN_KEY,{expiresIn:'7d'});
     const data={
+      payload,
       accessToken,
       refreshToken
     }
