@@ -2,7 +2,6 @@ const multer = require('multer');
 const sharp = require('sharp');
 const path = require('path');
 const aws = require('aws-sdk');
-const fs = require('fs');
 
 const s3 = new aws.S3();
 const bucketName = 'cyclic-alive-pig-poncho-ap-northeast-1';
