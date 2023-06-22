@@ -2,6 +2,8 @@ const conversationModel=require('../model/conversation');
 const userModel=require('../model/user')
 const chatModel=require('../model/chat');
 const response=require('../helper/response')
+const generatePresignedUrl=require('../config/filepath')
+
 
 const createConversation=async(req,res)=>{
     try {
@@ -11,6 +13,9 @@ const createConversation=async(req,res)=>{
         if(!recieverId){
             response.errorResponseNotFound(res,"No Reciever found with this Username!")
         };
+        if(participants.length >= 4){
+            response.errorResponseNotFound(res,"maximum group chat can Have four participants!")
+        }
         const newConversation=await conversationModel.create({
             participants:[id,recieverId]
         });
@@ -25,20 +30,23 @@ const createConversation=async(req,res)=>{
 
 const createChat=async(req,res)=>{
     try {
-        const {filename}=req.file
+        console.log(req.body)
+        const {path}=req.file
         const _id=req.user.id;
         
         const {reciever,contentType,message,conversationId}=req.body;
         const recieverExist=await userModel.findOne({username:reciever});
         if(!recieverExist){
             response.errorResponseBadRequest(res,"No user with this username found")
-        };
+        }; 
+         const fileUrl =await generatePresignedUrl(path);
+         console.log(fileUrl)
         let newChat=await chatModel.create({
             conversationId:conversationId,sender:_id,reciever:reciever,contentType:contentType,message:message
             })
         if(contentType==='Audio' || contentType==='Video' || contentType==='file'){
              newChat=await chatModel.create({
-                conversationId:conversationId,sender:_id,reciever:reciever,contentType:contentType,message:message,messageUrl:filename
+                conversationId:conversationId,sender:_id,reciever:reciever,contentType:contentType,messageUrl:fileUrl
                 });  
         };
         await newChat.save();

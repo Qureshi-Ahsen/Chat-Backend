@@ -1,24 +1,25 @@
 const bcrypt=require('bcrypt');
 const jwt=require('jsonwebtoken');
 const userModel=require('../model/user');
-const response=require('../helper/response')
+const response=require('../helper/response');
+const generatePresignedUrl=require('../config/filepath')
 
 const register=async (req,res)=>{
   try {
-    const { mimetype,filename,size} =req.file;
-    console.log(req.file)
+    const { mimetype,path,size} =req.file;
+    console.log(req.file);
     const {email,password,firstName,lastName,username}=req.body
     const userExists=await userModel.findOne({email:email});
     if(userExists){
      return response.errorResponseBadRequest(res,"User alresdy exists")
     };
     const bcryptPassword=await bcrypt.hash(password,10);
+    const fileUrl =await generatePresignedUrl(path);
     const newUser=await userModel({
         firstName:firstName,lastName:lastName,email:email,password:bcryptPassword,
         username:username,
-        avatar:{avatarType:mimetype,avatarName:filename,avatarSize:size}
+        avatar:{avatarType:mimetype,avatarName:fileUrl,avatarSize:size}
     });
-    console.log(path)
     await newUser.save();
     response.successResponseWithData(res,newUser,"User registered Successfully")
   } catch (error) {

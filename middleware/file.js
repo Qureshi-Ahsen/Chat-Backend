@@ -23,6 +23,7 @@ const upload = multer({
       if (!req.file) {
         return res.status(400).json({ error: 'No audio uploaded!' });
       }
+      console.log('hi')
       next(); 
     })
    
