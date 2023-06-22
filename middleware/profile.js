@@ -59,7 +59,7 @@ const uploadMiddleware = (req, res, next) => {
 
 const processImage = async (fileBuffer, outputPath) => {
   await sharp(fileBuffer)
-    .resize(null, 200)
+    .resize(null, 86)
     .flatten({ background: '#ff6600' })
     .sharpen()
     .withMetadata()
