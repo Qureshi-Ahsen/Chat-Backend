@@ -1,8 +1,6 @@
 const Joi = require('joi');
 
 const schema = Joi.object({
-  firstName: Joi.string().required().empty(),
-  lastName: Joi.string().required().empty(),
   username: Joi.string().required().empty(),
   email: Joi.string().email().required().messages({
     'string.email': 'Email format is Invalid',

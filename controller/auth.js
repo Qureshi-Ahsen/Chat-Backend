@@ -8,7 +8,7 @@ const register=async (req,res)=>{
   try {
     const { mimetype,path,size} =req.file;
     console.log(req.file);
-    const {email,password,firstName,lastName,username}=req.body
+    const {email,password,username}=req.body
     const userExists=await userModel.findOne({email:email});
     if(userExists){
      return response.errorResponseBadRequest(res,"User alresdy exists")
@@ -16,7 +16,7 @@ const register=async (req,res)=>{
     const bcryptPassword=await bcrypt.hash(password,10);
     const fileUrl =await generatePresignedUrl(path);
     const newUser=await userModel({
-        firstName:firstName,lastName:lastName,email:email,password:bcryptPassword,
+        email:email,password:bcryptPassword,
         username:username,
         avatar:{avatarType:mimetype,avatarName:fileUrl,avatarSize:size}
     });
@@ -38,7 +38,7 @@ const login=async(req,res)=>{
     if(!matchPassword){
       response.errorResponseBadRequest(res,"Invalid Password")
     };
-    const payload={id:user._id,email:user.email,role:user.role,currentRole:user.currentRole,firstName:user.firstName,lastName:user.lastName}
+    const payload={id:user._id,email:user.email,avatarName:user.avatarName,username:user.username}
     const accessToken=await jwt.sign(payload,process.env.ACCESSTOKEN_KEY,{expiresIn:'2h'});
     const refreshToken=await jwt.sign({id:user._id},process.env.REFRESHTOKEN_KEY,{expiresIn:'7d'});
     const data={
@@ -59,7 +59,7 @@ const refresh=async(req,res)=>{
    try { 
      const id=req.decodedToken.id;
      const user=await userModel.findById({_id:id},{password:0})
-     const payload={id:user._id,email:user.email,role:user.role,currentRole:user.currentRole,firstName:user.firstName,lastName:user.lastName}
+     const payload={id:user._id,email:user.email,avatarName:user.avatarName,username:user.username}
      const newAccessToken= await jwt.sign(payload,process.env.ACCESSTOKEN_KEY,{expiresIn:'2h'});
      res.cookie('accessToken',newAccessToken,{maxAge:172800000,httpOnly:true})
      response.successResponseWithData(res,newAccessToken,"Generated Access token Successfully")
