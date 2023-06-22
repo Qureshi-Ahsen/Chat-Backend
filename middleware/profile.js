@@ -1,5 +1,6 @@
 const multer = require('multer');
 const sharp = require('sharp');
+const path = require('path');
 const aws = require('aws-sdk');
 const S3FS = require('s3fs');
 const s3 = new aws.S3();
