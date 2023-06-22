@@ -7,12 +7,7 @@ const fs = require('fs');
 const s3 = new aws.S3();
 const bucketName = 'cyclic-alive-pig-poncho-ap-northeast-1';
 
-const storage = multer.diskStorage({
-  destination: 'uploads/',
-  filename: (req, file, cb) => {
-    cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
-  },
-});
+const storage = multer.memoryStorage();
 
 const fileFilter = (req, file, cb) => {
   const filetypes = /jpeg|jpg|png|gif|jfif/;
