@@ -1,6 +1,10 @@
 const multer = require('multer');
 const sharp = require('sharp');
-const path = require('path');
+const aws = require('aws-sdk');
+const S3FS = require('s3fs');
+const s3 = new aws.S3();
+const bucketName = 'cyclic-alive-pig-poncho-ap-northeast-1';
+const s3fsImpl = new S3FS(bucketName, { /* options */ });
 
 const storage = multer.diskStorage({
   destination: 'uploads/',
@@ -38,8 +42,13 @@ const upload = multer({
       }
       const resizedFilePath = 'avatar/'+req.file.fieldname+'-' + Date.now() + path.extname(req.file.originalname);
       try {
-        await processImage(req.file.path, resizedFilePath); 
-        req.file.path = resizedFilePath;
+        const s3Path = 'uploads/' + resizedFilePath;
+        const stream = fs.createReadStream(resizedFilePath);
+        await s3fsImpl.writeFile(s3Path, stream);
+  
+        fs.unlinkSync(resizedFilePath);
+  
+        req.file.path = s3Path;
         next();
       } catch (error) {
         console.log(error);
