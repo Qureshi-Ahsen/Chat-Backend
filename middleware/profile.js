@@ -39,17 +39,18 @@ const uploadMiddleware = (req, res, next) => {
     const resizedFilePath = 'avatar/' + req.file.fieldname + '-' + Date.now() + path.extname(req.file.originalname);
     try {
       const s3Path = 'uploads/' + resizedFilePath;
-      const fileContent = fs.readFileSync(req.file.path);
+      const fileContent = req.file.buffer;
 
+      // Upload the file to S3
       const params = {
         Bucket: bucketName,
         Key: s3Path,
         Body: fileContent,
       };
-
       await s3.upload(params).promise();
 
-      fs.unlinkSync(req.file.path);
+      // Process the uploaded file
+      await processImage(fileContent, s3Path);
 
       req.file.path = s3Path;
       next();
@@ -60,15 +61,30 @@ const uploadMiddleware = (req, res, next) => {
   });
 };
 
-
-const processImage = async (inputPath, outputPath) => {
-  await sharp(inputPath)
+const processImage = async (fileBuffer, outputPath) => {
+  await sharp(fileBuffer)
     .resize(null, 200)
     .flatten({ background: '#ff6600' })
     .sharpen()
     .withMetadata()
     .toFormat('webp', { quality: 90, background: '#ff6600' })
-    .toFile(outputPath);
+    .toBuffer(async (err, processedBuffer) => {
+      if (err) {
+        console.log(err);
+        throw new Error('Image processing error: ' + err.message);
+      }
+
+      try {
+        await s3.putObject({
+          Bucket: bucketName,
+          Key: outputPath,
+          Body: processedBuffer,
+        }).promise();
+      } catch (error) {
+        console.log(error);
+        throw new Error('Image processing error: Failed to upload processed image to S3');
+      }
+    });
 };
 
 module.exports = { uploadMiddleware };
