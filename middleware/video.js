@@ -1,12 +1,11 @@
 const multer = require('multer');
 const path = require('path');
+const aws = require('aws-sdk');
 
-const storage = multer.diskStorage({
-  destination: 'video/',
-  filename: (req, file, cb) => {
-    cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
-  },
-});
+const s3 = new aws.S3();
+const bucketName = 'cyclic-alive-pig-poncho-ap-northeast-1';
+
+const storage = multer.memoryStorage();
 
 const fileFilter = (req, file, cb) => {
     const allowedExtensions = ['.mp4'];
@@ -31,9 +30,24 @@ const upload = multer({
         return res.status(400).json({ error: errorMessage + err.message });
       }
       if (!req.file) {
-        return res.status(400).json({ error: 'No audio uploaded!' });
+        return res.status(400).json({ error: 'No Video uploaded!' });
       }
-      next(); 
+      const FilePath = 'video/' + req.file.fieldname + '-' + Date.now() + path.extname(req.file.originalname);
+      try {
+        const s3Path = 'uploads/' + FilePath;
+        const fileContent = req.file.buffer;
+        const params = {
+          Bucket: bucketName,
+          Key: s3Path,
+          Body: fileContent,
+        };
+        await s3.upload(params).promise();
+        req.file.path = s3Path;
+        next();
+      } catch (error) {
+        console.log(error);
+        return res.status(500).json({ error: 'Video processing error: ' + error.message });
+      }
     })
    
 };

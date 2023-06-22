@@ -1,13 +1,12 @@
 const multer = require('multer');
 const sharp = require('sharp');
 const path = require('path');
+const aws = require('aws-sdk');
 
-const storage = multer.diskStorage({
-  destination: 'uploads/',
-  filename: (req, file, cb) => {
-    cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
-  },
-});
+const s3 = new aws.S3();
+const bucketName = 'cyclic-alive-pig-poncho-ap-northeast-1';
+
+const storage = multer.memoryStorage();
 
 const fileFilter = (req, file, cb) => {
   const filetypes = /jpeg|jpg|png|gif|jfif/;
@@ -32,14 +31,17 @@ const uploadMiddleware = (req, res, next) => {
     if (!req.file) {
       return res.status(400).json({ error: 'No image uploaded!' });
     }
-    const previewFolderPath = 'preview/';
-    const fileExtension = path.extname(req.file.filename);
-    const originalFilenameWithoutExtension = path.basename(req.file.filename, fileExtension);
-    const previewFilename = originalFilenameWithoutExtension + '-preview' + fileExtension;
-    const previewFilePath = path.join(previewFolderPath, previewFilename);
+    const FilePath = 'image/' + req.file.fieldname + '-' + Date.now() + path.extname(req.file.originalname);
     try {
-      await processImage(req.file.path, previewFilePath);
-      req.file.path = previewFilePath;
+      const s3Path = 'uploads/' + FilePath;
+      const fileContent = req.file.buffer;
+      const params = {
+        Bucket: bucketName,
+        Key: s3Path,
+        Body: fileContent,
+      };
+      await s3.upload(params).promise();
+      req.file.path = s3Path;
       next();
     } catch (error) {
       console.log(error);
@@ -60,12 +62,16 @@ const bulkUploadMiddleware = (req, res, next) => {
     const previewFolderPath = 'preview/';
      try {
       for (const file of req.files) {
-        const fileExtension = path.extname(file.filename);
-        const originalFilenameWithoutExtension = path.basename(file.filename, fileExtension);
-        const previewFilename = originalFilenameWithoutExtension + '-preview' + fileExtension;
-        const previewFilePath = path.join(previewFolderPath, previewFilename);
-        await processImage(file.path, previewFilePath);
-        file.path = previewFilePath;
+        const FilePath = 'image/' + req.file.fieldname + '-' + Date.now() + path.extname(req.file.originalname);
+        const s3Path = 'uploads/' + FilePath;
+        const fileContent = req.file.buffer;
+        const params = {
+          Bucket: bucketName,
+          Key: s3Path,
+          Body: fileContent,
+        };
+        await s3.upload(params).promise();
+        req.file.path = s3Path;
       }
      next();
     } catch (error) {
@@ -75,9 +81,4 @@ const bulkUploadMiddleware = (req, res, next) => {
   });
 };
 
-const processImage = async (inputPath, outputPath) => {
-  await sharp(inputPath)
-  .resize(null, 200)
-  .flatten({ background: '#ff6600' }).sharpen().withMetadata().toFormat('webp', { quality: 90, background: '#ff6600' }).toFile(outputPath);
-};
 module.exports = {uploadMiddleware,bulkUploadMiddleware,};

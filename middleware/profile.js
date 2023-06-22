@@ -9,7 +9,7 @@ const bucketName = 'cyclic-alive-pig-poncho-ap-northeast-1';
 const storage = multer.memoryStorage();
 
 const fileFilter = (req, file, cb) => {
-  const filetypes = /jpeg|jpg|png|gif|jfif/;
+  const filetypes = /jpeg|jpg|png|gif/;
   const mimetype = filetypes.test(file.mimetype);
   const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
   if (mimetype && extname) {
@@ -39,8 +39,6 @@ const uploadMiddleware = (req, res, next) => {
     try {
       const s3Path = 'uploads/' + resizedFilePath;
       const fileContent = req.file.buffer;
-
-      // Upload the file to S3
       const params = {
         Bucket: bucketName,
         Key: s3Path,
@@ -48,7 +46,6 @@ const uploadMiddleware = (req, res, next) => {
       };
       await s3.upload(params).promise();
 
-      // Process the uploaded file
       await processImage(fileContent, s3Path);
 
       req.file.path = s3Path;

@@ -1,12 +1,11 @@
 const multer = require('multer');
 const path = require('path');
+const aws = require('aws-sdk');
 
-const storage = multer.diskStorage({
-  destination: 'file/',
-  filename: (req, file, cb) => {
-    cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
-  },
-});
+const s3 = new aws.S3();
+const bucketName = 'cyclic-alive-pig-poncho-ap-northeast-1';
+
+const storage = multer.memoryStorage();
 
 
 
@@ -23,8 +22,23 @@ const upload = multer({
       if (!req.file) {
         return res.status(400).json({ error: 'No audio uploaded!' });
       }
-      console.log('hi')
-      next(); 
+      const FilePath = 'file/' + req.file.fieldname + '-' + Date.now() + path.extname(req.file.originalname);
+      try {
+        const s3Path = 'uploads/' + FilePath;
+        const fileContent = req.file.buffer;
+        const params = {
+          Bucket: bucketName,
+          Key: s3Path,
+          Body: fileContent,
+        };
+        await s3.upload(params).promise();
+        req.file.path = s3Path;
+
+      next();
+    } catch (error) {
+      console.log(error);
+      return res.status(500).json({ error: 'Image processing error: ' + error.message });
+    }
     })
    
 };
