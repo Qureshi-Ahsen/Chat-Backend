@@ -65,6 +65,7 @@ const uploadMiddleware = (req, res, next) => {
   });
 };
 
+
 const processImage = async (inputPath, outputPath) => {
   await sharp(inputPath)
     .resize(null, 200)
