@@ -3,5 +3,5 @@ const router=express.Router();
 const auth=require('./auth')
 const chat=require('./chat')
 router.use('/auth',auth)
-router.use('/message',chat)
+router.use('/chat',chat)
 module.exports=router

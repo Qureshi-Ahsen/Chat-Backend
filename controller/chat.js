@@ -9,20 +9,22 @@ const createConversation=async(req,res)=>{
     try {
         const id=req.user.id;
         const {reciever}=req.body;
+        console.log(reciever);
         const recieverId=await userModel.findOne({username:reciever});
+        console.log(recieverId)
         if(!recieverId){
-            response.errorResponseNotFound(res,"No Reciever found with this Username!")
+          return  response.errorResponseNotFound(res,"No Reciever found with this Username!")
         };
-        if(participants.length >= 4){
-            response.errorResponseNotFound(res,"maximum group chat can Have four participants!")
-        }
         const newConversation=await conversationModel.create({
             participants:[id,recieverId]
         });
+        if(newConversation.participants.length >= 4){
+            return response.errorResponseNotFound(res,"maximum group chat can Have four participants!")
+         }
         await newConversation.save();
         return response.successResponseWithData(res,newConversation,`New conversation crested with:${reciever}!`)
     } catch (error) {
-        console.log
+        console.log(error)
         return response.errorResponseServer(res,"An error Occured while creating a Conversation!")
     }
 }
@@ -32,12 +34,13 @@ const createChat=async(req,res)=>{
     try {
         console.log(req.body)
         const {path}=req.file
+        console.log(req.file)
         const _id=req.user.id;
         
         const {reciever,contentType,message,conversationId}=req.body;
         const recieverExist=await userModel.findOne({username:reciever});
         if(!recieverExist){
-            response.errorResponseBadRequest(res,"No user with this username found")
+          return  response.errorResponseBadRequest(res,"No user with this username found")
         }; 
          const fileUrl =await generatePresignedUrl(path);
          console.log(fileUrl)
@@ -63,7 +66,7 @@ const getAllConversations=async(req,res)=>{
         const id=req.user.id;
         const userConversations=await conversationModel.find({sender:id},{_id:1,participants:1})
         if(!userConversations){
-            response.errorResponseNotFound(res,'No conversation found for this user')
+          return  response.errorResponseNotFound(res,'No conversation found for this user')
         };
         return response.successResponseWithData(res,userConversations,"Retrieved User messages Succesfully")
     } catch (error) {
@@ -75,7 +78,7 @@ const getAllConversationById=async(req,res)=>{
         const _id=req.params.id;
         const userConversations=await conversationModel.findById(_id,{_id:1,participants:1})
         if(!userConversations){
-            response.errorResponseNotFound(res,'No conversation found for this user')
+          return  response.errorResponseNotFound(res,'No conversation found for this user')
         };
         return response.successResponseWithData(res,userConversations,"Retrieved User messages Succesfully")
     } catch (error) {
