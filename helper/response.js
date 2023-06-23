@@ -21,6 +21,13 @@ function errorResponseBadRequest(res,message) {
     }
     res.status(400).send(x)
 };
+function errorResponseUnauthorized(res,message) {
+    let x={
+        message,
+        status:0
+    }
+    res.status(401).send(x)
+};
 function errorResponseNotFound(res,message) {
     let x={
         message,
@@ -39,4 +46,4 @@ function successResponseWithoutData(res,message){
     
 }
 
-module.exports={successResponseWithData,errorResponseServer,successResponseWithoutData,errorResponseNotFound,errorResponseBadRequest}
+module.exports={successResponseWithData,errorResponseServer,successResponseWithoutData,errorResponseNotFound,errorResponseBadRequest,errorResponseUnauthorized}

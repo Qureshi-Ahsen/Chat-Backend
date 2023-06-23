@@ -32,13 +32,13 @@ const login=async(req,res)=>{
     const {email,password}=req.body;
     const user=await userModel.findOne({email:email});
     if(!user){
-      response.errorResponseNotFound(res,"User with this Email does not exist")
+      return response.errorResponseNotFound(res,"User with this Email does not exist")
     };
     const matchPassword=await bcrypt.compare(password,user.password)
     if(!matchPassword){
-      response.errorResponseBadRequest(res,"Invalid Password")
+     return response.errorResponseBadRequest(res,"Invalid Password")
     };
-    const payload={id:user._id,email:user.email,avatarName:user.avatarName,username:user.username}
+    const payload={id:user._id,email:user.email,avatarName:user.avatar.avatarName,username:user.username}
     const accessToken=await jwt.sign(payload,process.env.ACCESSTOKEN_KEY,{expiresIn:'2h'});
     const refreshToken=await jwt.sign({id:user._id},process.env.REFRESHTOKEN_KEY,{expiresIn:'7d'});
     const data={
@@ -48,7 +48,7 @@ const login=async(req,res)=>{
     }
     res.cookie('accessToken',accessToken,{maxAge:172800000,httpOnly:true})
     res.cookie('refreshToken',refreshToken,{maxAge:604800000,httpOnly:true})
-    response.successResponseWithData(res,data,"User logged in Successfully")
+    return response.successResponseWithData(res,data,"User logged in Successfully")
   } catch (error) {
     console.log(error)
     return response.errorResponseServer(res,'An Error Occured while logging in! Please try again later.')
@@ -62,7 +62,7 @@ const refresh=async(req,res)=>{
      const payload={id:user._id,email:user.email,avatarName:user.avatarName,username:user.username}
      const newAccessToken= await jwt.sign(payload,process.env.ACCESSTOKEN_KEY,{expiresIn:'2h'});
      res.cookie('accessToken',newAccessToken,{maxAge:172800000,httpOnly:true})
-     response.successResponseWithData(res,newAccessToken,"Generated Access token Successfully")
+    return response.successResponseWithData(res,newAccessToken,"Generated Access token Successfully")
    } catch (error) {
     console.error('Error verifying refresh token:', error);
     return response.errorResponseServer(res,'Error verifying refresh token ! Try again later')
