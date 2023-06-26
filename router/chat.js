@@ -8,7 +8,7 @@ router.post('/conversation', auth, chatController.createConversation);
 router.post('/message', auth,imageMiddleware.uploadMiddleware, chatController.createChat);
 router.post('/messages', auth,imageMiddleware.bulkUploadMiddleware, chatController.createChat);
 
-router.post('/all', auth, chatController.getAllConversations);
-router.post('/:id', chatController.getAllConversationById);
+router.get('/all', auth, chatController.getAllConversations);
+router.get('/:id', chatController.getAllConversationById);
 
 module.exports = router;

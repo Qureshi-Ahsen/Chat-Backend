@@ -10,7 +10,7 @@ const createConversation=async(req,res)=>{
         const id=req.user.id;
         const {reciever}=req.body;
         console.log(reciever);
-        const recieverId=await userModel.findOne({username:reciever});
+        const recieverId=await userModel.findOne({username:reciever},{password:0});
         console.log(recieverId)
         if(!recieverId){
           return  response.errorResponseNotFound(res,"No Reciever found with this Username!")
