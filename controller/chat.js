@@ -64,7 +64,7 @@ const createChat=async(req,res)=>{
 const getAllConversations=async(req,res)=>{
     try {
         const id=req.user.id;
-        const userConversations=await chatModel.find({sender:id},{_id:1,participants:1}).limit(50)
+        const userConversations=await conversationModel.find({participants:id},{_id:1,participants:1}).limit(50)
         if(!userConversations){
           return  response.errorResponseNotFound(res,'No conversation found for this user')
         };
@@ -76,7 +76,7 @@ const getAllConversations=async(req,res)=>{
 const getAllConversationById=async(req,res)=>{
     try {
         const _id=req.params.id;
-        const userConversations=await chatModel.findById(_id,{_id:1,participants:1})
+        const userConversations=await chatModel.findById(_id)
         if(!userConversations){
           return  response.errorResponseNotFound(res,'No conversation found for this user')
         };
