@@ -70,7 +70,7 @@ const getAllConversations=async(req,res)=>{
         };
         return response.successResponseWithData(res,userConversations,"Retrieved User messages Succesfully")
     } catch (error) {
-        return response.errorResponseServer(res,'An error Occured While Creating Chat!')
+        return response.errorResponseServer(res,'An error Occured While loading Chat!')
     }
 }
 const getAllConversationById=async(req,res)=>{
@@ -82,7 +82,7 @@ const getAllConversationById=async(req,res)=>{
         };
         return response.successResponseWithData(res,userConversations,"Retrieved User messages Succesfully")
     } catch (error) {
-        return response.errorResponseServer(res,'An error Occured While Creating Chat!')
+        return response.errorResponseServer(res,'An error Occured While loading Chat messages!')
     }
 }
 
