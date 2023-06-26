@@ -70,7 +70,8 @@ const getAllConversations=async(req,res)=>{
         };
         return response.successResponseWithData(res,userConversations,"Retrieved User messages Succesfully")
     } catch (error) {
-        return response.errorResponseServer(res,'An error Occured While loading Chat!')
+        console.log(error)
+        return response.errorResponseServer(res,`An error Occured While loading Chat messages: ${error}!`)
     }
 }
 const getAllConversationById=async(req,res)=>{
@@ -83,7 +84,7 @@ const getAllConversationById=async(req,res)=>{
         return response.successResponseWithData(res,userConversations,"Retrieved User messages Succesfully")
     } catch (error) {
         console.log(error)
-        return response.errorResponseServer(res,'An error Occured While loading Chat messages!')
+        return response.errorResponseServer(res,`An error Occured While loading Chat messages: ${error}!`)
     }
 }
 
