@@ -77,7 +77,7 @@ const getAllConversations=async(req,res)=>{
 const getAllConversationById=async(req,res)=>{
     try {
         const _id=req.params.id;
-        const userConversations=await chatModel.find({conversationId:_id})
+        const userConversations=await chatModel.findOne({conversationId:_id})
         if(!userConversations){
           return  response.errorResponseNotFound(res,'No conversation found for this user')
         };
