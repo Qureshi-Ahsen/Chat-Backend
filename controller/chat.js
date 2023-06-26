@@ -82,6 +82,7 @@ const getAllConversationById=async(req,res)=>{
         };
         return response.successResponseWithData(res,userConversations,"Retrieved User messages Succesfully")
     } catch (error) {
+        console.log(error)
         return response.errorResponseServer(res,'An error Occured While loading Chat messages!')
     }
 }
