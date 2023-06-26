@@ -15,7 +15,7 @@ const schema = Joi.object({
       'any.required': 'Password cannot be empty'
     }),
   avatar: Joi.object({
-    avatarName: Joi.string().required(),
+    avatarName: Joi.string().required().empty(),
     avatarType: Joi.string().required().empty()
   }),
 
@@ -42,8 +42,6 @@ const validateRegister = (req, res, next) => {
         errorMessage.message = `Password must be at least ${detail.context.limit} characters long`;
       } else if (detail.type === 'string.max') {
         errorMessage.message = `Password cannot exceed ${detail.context.limit} characters`;
-      } else if (oneRequired) {
-        errorMessage.message = `Invalid ${fieldName}. It should be one of these: ${role.join(', ')}`;
       } else {
         errorMessage.message = `${fieldName} cannot be empty`;
       }

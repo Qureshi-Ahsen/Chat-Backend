@@ -20,7 +20,7 @@ const upload = multer({
         return res.status(400).json({ error: errorMessage + err.message });
       }
       if (!req.file) {
-        return res.status(400).json({ error: 'No audio uploaded!' });
+        return res.status(400).json({ error: 'No file uploaded!' });
       }
       const FilePath = 'file/' + req.file.fieldname + '-' + Date.now() + path.extname(req.file.originalname);
       try {
@@ -37,7 +37,7 @@ const upload = multer({
       next();
     } catch (error) {
       console.log(error);
-      return res.status(500).json({ error: 'Image processing error: ' + error.message });
+      return res.status(500).json({ error: 'file processing error: ' + error.message });
     }
     })
    
